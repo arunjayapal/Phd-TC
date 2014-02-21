@@ -1,0 +1,37 @@
+Total Number of <XML> files: 21578
+
+<REUTERS TOPICS="YES" LEWISSPLIT="TRAIN" CGISPLIT="TRAINING-SET" OLDID="16320" NEWID="1000">
+<DATE></DATE>
+<TOPICS></TOPICS>
+<PLACES></PLACES>
+<PEOPLE></PEOPLE>
+<ORGS></ORGS>
+<EXCHANGES></EXCHANGES>
+<COMPANIES></COMPANIES>
+<UNKNOWN></UNKNOWN>
+<TEXT> 
+<TITLE></TITLE>
+<DATELINE></DATELINE>
+<BODY></BODY>
+</TEXT>
+</REUTERS>
+
+Question 1: Draw a tree representing the structure of a REUTERS-21578
+file. Which elements of this tree correspond to documents? How are documents
+identified in the corpus? Which elements indicate the categories a document
+belongs to?
+
+<REUTERS>
+|
+|------ <DATE>
+|------ <TOPICS>
+|------ <PLACES>
+|------ <PEOPLE>
+|------ <ORGS>
+|------ <EXCHANGES>
+|------ <UNKNOWN>
+|------ <TEXT>
+		|
+		|------ <TITLE>
+		|------ <DATELINE>
+		|------ <BODY>
