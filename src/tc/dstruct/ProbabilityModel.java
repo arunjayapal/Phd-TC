@@ -47,7 +47,6 @@ public class ProbabilityModel implements Serializable {
 	private Set<String> docSet = new HashSet<String>();
 	private Set<String> termSet = new HashSet<String>();
 	private Map<String, Map<String, Integer>> termCount_cat = new HashMap<String, Map<String, Integer>>();
-	private Map<String, Integer> termCount_doc = new HashMap<String, Integer>();
 	private int totalTermCountinCorpus = 0;
 	public int corpusSize = 0;
 
@@ -254,29 +253,27 @@ public class ProbabilityModel implements Serializable {
 
 		// pT = total count of Term T in Corpus / total number of terms in
 		// Corpus
-		double pT = getTermCountInCorpus(term) / totalTermCountinCorpus; //
-		System.out.println(getTermCountInCorpus(term) + ":"
-				+ totalTermCountinCorpus);
+		double pT = (double) getTermCount(term)
+				/ (double) getDocSet().size();
 
 		// pC = total count of Docs in Category C / total number of documents in
 		// Corpus
-		double pC = getDocCount(cat) / getDocSet().size();
-//		System.out.println(getDocCount(term, cat)(term) + ":"
-//				+ totalTermCountinCorpus);
+		double pC = (double) getDocCount(cat) / (double) getDocSet().size();
 
 		// pTAndC = total count of term T in Category C / total number of terms
 		// in Corpus
-		double pTAndC = getTermCountInCategory(term, cat) / totalTermCountinCorpus; //
+		double pTAndC = ((double) getDocCount(term, cat)
+				/ (double) getDocSet().size()) * (pC); //
 
 		// pTAnd_C = total count of term T not in Category C / total number of
-		// terms in Corpus
+		// terms in Corpus //P(t, ^c) = P(t) − P(t, c)
 		double pTAnd_C = pT - pTAndC;
 
-		// p_TAndC
-		double p_TAndC = pC - pTAndC;
+		// p_TAndC //P(^t, c) = (1 − P(t|c))P(c))
+		double p_TAndC = 1 - pTAndC;
 
-		// p_TAnd_C
-		double p_TAnd_C = 1 - (pT + pC - pTAndC);
+		// p_TAnd_C //P (^t, ^c) = (1 − P(t))P(^t, c)
+		double p_TAnd_C = (1-pT)*p_TAndC;
 
 		System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
 				+ p_TAndC + ":" + p_TAnd_C);

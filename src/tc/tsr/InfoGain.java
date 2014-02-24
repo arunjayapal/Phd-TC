@@ -32,10 +32,10 @@ public class InfoGain extends TermFilter {
 	 */
 	public double computeLocalTermScore(String term, String cat) {
 		Probabilities p = pm.getProbabilities(term, cat);
-		double first_ = (p.tc * p.c) * Maths.log2((p.tc * p.c)/ (p.t * p.c)); //P(t, c) = P (t|c) P(c)
-		double second_ = ((1-p.tc) * p.c ) * Maths.log2(((1-p.tc) * p.c)/(1-p.t)*(1-p.c)); //P(^t, c) = (1 − P(t|c))P(c))
-		double third_ = (p.t - p.tc) * Maths.log2((p.t - p.tc)/ (p.t) * (1-p.c)); //P(t, ^c) = P(t) − P(t, c)
-		double fourth_ = ((1-p.t) * second_) * Maths.log2(((1-p.t) * second_) / ((1-p.t) * (1-p.c))); //P (^t, ^c) = (1 − P(t))P(^t, c)
+		double first_ = (double)(p.tc) * Maths.log2((double)(p.tc)/ (double)(p.t * p.c)); //P(t, c) = P (t|c) P(c)
+		double second_ = (double)(p.ntc ) * Maths.log2((double)p.ntc/(double)(1-p.t)*(double)(1-p.c)); //P(^t, c) = (1 − P(t|c))P(c))
+		double third_ = (double)(p.tnc) * Maths.log2((double)p.tnc/ (double)(p.t) * (double)(1-p.c)); //P(t, ^c) = P(t) − P(t, c)
+		double fourth_ = ((double)p.ntnc) * Maths.log2((double)p.ntnc / ((double)(1-p.t) * (double)(1-p.c))); //P (^t, ^c) = (1 − P(t))P(^t, c)
 		double ig = first_ + second_ + third_ + fourth_;
 		return ig;
 	}
