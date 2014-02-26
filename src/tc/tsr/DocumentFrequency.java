@@ -6,6 +6,8 @@
  **/
 package tc.tsr;
 
+import java.util.Set;
+
 import tc.dstruct.ProbabilityModel;
 
 /**
@@ -31,7 +33,7 @@ public class DocumentFrequency extends TermFilter {
 	 * integer) the document frequency for a given term and category.
 	 */
 	public double computeLocalTermScore(String term, String cat) {
-		return pm.getDocCount(term, cat) / pm.getDocSet().size();
+		return (double) pm.getDocCount(term, cat) / (double) pm.getDocSet().size();
 	}
 
 	/**
@@ -50,9 +52,16 @@ public class DocumentFrequency extends TermFilter {
 	 * the WordScorePair table (wsp) with the global values. (Should this method
 	 * be implemented here or in TermFilter's subclasses?)
 	 */
-	public void computeGlobalScoresSUM() {
+	public double computeGlobalScoresSUM(String term) {
 		System.err.println("Computing GLOBAL TSR for " + wsp.length
 				+ " terms using f_sum");
+		Set<String> all_cats = pm.getCategorySet();
+		double df = 0.0;
+		
+		for(String cat: all_cats)
+			df+=computeLocalTermScore(term, cat);
+		
+		return df;
 	}
 
 	/**
@@ -62,9 +71,16 @@ public class DocumentFrequency extends TermFilter {
 	 * update the WordScorePair table (wsp) with the global values. (Should this
 	 * method be implemented here or in TermFilter's subclasses?)
 	 */
-	public void computeGlobalScoresMAX() {
+	public double computeGlobalScoresMAX(String term) {
 		System.err.println("Computing GLOBAL TSR for " + wsp.length
 				+ " terms using f_max");
+		Set<String> all_cats = pm.getCategorySet();
+		double df = 0.0;
+		for(String cat: all_cats){
+			if (computeLocalTermScore(term, cat) > df)
+				df = computeLocalTermScore(term, cat);
+		}
+		return df;
 	}
 
 	/**
@@ -74,9 +90,18 @@ public class DocumentFrequency extends TermFilter {
 	 * and update the WordScorePair table (wsp) with the global values. (Should
 	 * this method be implemented here or in TermFilter's subclasses?)
 	 */
-	public void computeGlobalScoresWAVG() {
+	public double computeGlobalScoresWAVG(String term) {
 		System.err.println("Computing GLOBAL TSR for " + wsp.length
 				+ " using f_wavg");
+		Set<String> all_cats = pm.getCategorySet();
+		double df = 0.0;
+		
+		for(String cat: all_cats)
+			df+=computeLocalTermScore(term, cat);
+		
+		df /= all_cats.size();
+		
+		return df;
 	}
 
 }

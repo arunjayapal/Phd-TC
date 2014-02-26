@@ -5,15 +5,20 @@
  **/
 package tc.tsr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import tc.dstruct.CorpusList;
@@ -60,11 +65,13 @@ import tc.parser.NewsParser;
 public class MakeReducedTermSet {
 	private static CorpusList clist = null;
 	private static StopWordList swlist = null;
+	@SuppressWarnings("unused")
 	private static int aggressiveness = 0;
 
 	/**
 	 * Set up the main user interface items
 	 */
+	@SuppressWarnings("static-access")
 	public MakeReducedTermSet(String clist, String swlist, String aggr) {
 		super();
 		this.clist = new CorpusList(clist);
@@ -96,28 +103,55 @@ public class MakeReducedTermSet {
 			String methodOrCat) {
 		System.err.println("Starting filtering...");
 		WordScorePair[] wsp = pm.getWordScoreArray();
+		Set<String> global_scores = new HashSet<String>(Arrays.asList("_MAX",
+				"_SUM", "_WAVG"));
 		if (method.equals("ig")) {
 			InfoGain ig = new InfoGain(pm);
 			for (WordScorePair obj : wsp) {
-				obj.setScore(ig.computeLocalTermScore(obj.getWord(),
-						methodOrCat));
+				if (methodOrCat.equals("_MAX"))
+					obj.setScore(ig.computeGlobalScoresMAX(obj.getWord()));
+				else if (methodOrCat.equals("_SUM"))
+					obj.setScore(ig.computeGlobalScoresSUM(obj.getWord()));
+				else if (methodOrCat.equals("_WAVG"))
+					obj.setScore(ig.computeGlobalScoresWAVG(obj.getWord()));
+				else
+					obj.setScore(ig.computeLocalTermScore(obj.getWord(),
+							methodOrCat));
 			}
+		} else if (method.equals("df")) {
+			DocumentFrequency df = new DocumentFrequency(pm);
+			for (WordScorePair obj : wsp) {
+				if (methodOrCat.equals("_MAX"))
+					obj.setScore(df.computeGlobalScoresMAX(obj.getWord()));
+				else if (methodOrCat.equals("_SUM"))
+					obj.setScore(df.computeGlobalScoresSUM(obj.getWord()));
+				else if (methodOrCat.equals("_WAVG"))
+					obj.setScore(df.computeGlobalScoresWAVG(obj.getWord()));
+				else
+					obj.setScore(df.computeLocalTermScore(obj.getWord(),
+							methodOrCat));
+			}
+		} else {
+			System.err.println("The command line parameters should be checked again");
+			System.exit(0);
 		}
+		
 		return wsp;
 	}
 
-	private static Map<String, Double> sortWordScorePairs(
-			WordScorePair[] wsp) {
+	@SuppressWarnings("unchecked")
+	private static Map<String, Double> sortWordScorePairs(WordScorePair[] wsp) {
 		HashMap<String, Double> temp_map_ = new HashMap<String, Double>();
 		for (WordScorePair obj : wsp)
 			temp_map_.put(obj.getWord(), obj.getScore());
-//		ValueComparator bvc = new ValueComparator(temp_map_);
-//		TreeMap<String, Double> sorted_map_ = new TreeMap<String, Double>(
-//				temp_map_);
+		// ValueComparator bvc = new ValueComparator(temp_map_);
+		// TreeMap<String, Double> sorted_map_ = new TreeMap<String, Double>(
+		// temp_map_);
 		Map<String, Double> sorted_map_ = sortByComparator(temp_map_);
 		return sorted_map_;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static Map sortByComparator(Map unsortMap) {
 
 		List list = new LinkedList(unsortMap.entrySet());
@@ -125,8 +159,9 @@ public class MakeReducedTermSet {
 		// sort list based on comparator
 		Collections.sort(list, new Comparator() {
 			public int compare(Object o1, Object o2) {
-				return ((Comparable) ((Map.Entry) (o1)).getValue())
-						.compareTo(((Map.Entry) (o2)).getValue());
+				return -1
+						* ((Comparable) ((Map.Entry) (o1)).getValue())
+								.compareTo(((Map.Entry) (o2)).getValue());
 			}
 		});
 
@@ -140,6 +175,7 @@ public class MakeReducedTermSet {
 		return sortedMap;
 	}
 
+	@SuppressWarnings({ "rawtypes", "static-access" })
 	public static void main(String[] args) {
 		try {
 			MakeReducedTermSet f = new MakeReducedTermSet(args[0], args[1],
@@ -161,12 +197,17 @@ public class MakeReducedTermSet {
 			// **** term in the reduced set next to its score
 			Map<String, Double> sorted = sortWordScorePairs(wsp);
 			try {
-				for (String items : sorted.keySet())
-					System.out.println(items + ":" + sorted.get(items));
-				// for (int i = 0; i < wsp.length; i++) {
-				// System.out.println(wsp[i].getWord() + ":"
-				// + wsp[i].getScore());
-				// }
+				int tmp_count = 0;
+				for (String items : sorted.keySet()) {
+					if ((sorted.get(items).compareTo(Double.NaN) != 0)
+							&& tmp_count <= aggressiveness) {
+						System.out.println(items + ":" + sorted.get(items));
+						++tmp_count;
+					} else if (tmp_count > aggressiveness)
+						break;
+					else
+						continue;
+				}
 			} catch (NullPointerException npe) {
 				System.err.println("Nothing in the array");
 			}
