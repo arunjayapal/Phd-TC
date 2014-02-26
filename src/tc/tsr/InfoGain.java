@@ -39,4 +39,37 @@ public class InfoGain extends TermFilter {
 		double ig = first_ + second_ + third_ + fourth_;
 		return ig;
 	}
+	
+	/** ********** Lab 02 exercise: *************** 
+	   * Implement a method to combine local, category-specific, scores
+	   * (computed by computeLocalScores and stored in wsp) into global
+	   * scores through the method of SUM, and update the WordScorePair
+	   * table (wsp) with the global values. (Should this method be
+	   * implemented here or in TermFilter's subclasses?)
+	   */
+	  public void computeGlobalScoresSUM (){
+	    System.err.println("Computing GLOBAL TSR for "+wsp.length+" terms using f_sum");
+	  }
+
+	  /** ********** Lab 02 exercise: *************** 
+	   * Implement a method to combine local, category-specific, scores
+	   * (computed by computeLocalScores and stored in wsp) into global
+	   * scores through the method of MAXIMA, and update the WordScorePair
+	   * table (wsp) with the global values. (Should this method be
+	   * implemented here or in TermFilter's subclasses?)
+	   */
+	  public void computeGlobalScoresMAX (){
+	    System.err.println("Computing GLOBAL TSR for "+wsp.length+" terms using f_max");
+	  }
+
+	  /** ********** Lab 02 exercise: *************** 
+	   * Implement a method to combine local, category-specific, scores
+	   * (computed by computeLocalScores and stored in wsp) into global
+	   * scores through the method of WEIGHTED AVERAGE, and update the WordScorePair
+	   * table (wsp) with the global values. (Should this method be
+	   * implemented here or in TermFilter's subclasses?)
+	   */
+	  public void computeGlobalScoresWAVG (){
+	    System.err.println("Computing GLOBAL TSR for "+wsp.length+" using f_wavg");
+	  }
 }

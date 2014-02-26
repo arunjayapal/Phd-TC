@@ -5,9 +5,16 @@
  **/
 package tc.tsr;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
 import tc.dstruct.CorpusList;
 import tc.dstruct.ParsedText;
@@ -89,16 +96,48 @@ public class MakeReducedTermSet {
 			String methodOrCat) {
 		System.err.println("Starting filtering...");
 		WordScorePair[] wsp = pm.getWordScoreArray();
-		System.out.println(methodOrCat);
-		if (method.equals("ig")){
+		if (method.equals("ig")) {
 			InfoGain ig = new InfoGain(pm);
-			for (WordScorePair obj:wsp) {
-				System.out.println(obj.getWord());
-				System.out.println(ig.computeLocalTermScore(obj.getWord(), methodOrCat));
-//				obj.setScore(ig.computeLocalTermScore(obj.getWord(), methodOrCat));
+			for (WordScorePair obj : wsp) {
+				obj.setScore(ig.computeLocalTermScore(obj.getWord(),
+						methodOrCat));
 			}
 		}
 		return wsp;
+	}
+
+	private static Map<String, Double> sortWordScorePairs(
+			WordScorePair[] wsp) {
+		HashMap<String, Double> temp_map_ = new HashMap<String, Double>();
+		for (WordScorePair obj : wsp)
+			temp_map_.put(obj.getWord(), obj.getScore());
+//		ValueComparator bvc = new ValueComparator(temp_map_);
+//		TreeMap<String, Double> sorted_map_ = new TreeMap<String, Double>(
+//				temp_map_);
+		Map<String, Double> sorted_map_ = sortByComparator(temp_map_);
+		return sorted_map_;
+	}
+
+	private static Map sortByComparator(Map unsortMap) {
+
+		List list = new LinkedList(unsortMap.entrySet());
+
+		// sort list based on comparator
+		Collections.sort(list, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Comparable) ((Map.Entry) (o1)).getValue())
+						.compareTo(((Map.Entry) (o2)).getValue());
+			}
+		});
+
+		// put sorted list into map again
+		// LinkedHashMap make sure order in which keys were inserted
+		Map sortedMap = new LinkedHashMap();
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+		return sortedMap;
 	}
 
 	public static void main(String[] args) {
@@ -115,18 +154,23 @@ public class MakeReducedTermSet {
 			}
 			System.err.println("Probability Model size " + pm.getTermSetSize());
 			WordScorePair[] wsp = f.rank(termFilter, pm, category);
+			System.gc(); // garbage collection
 			System.err.println("Reducing Term set");
-//			try {
-//				for (int i = 0; i < wsp.length; i++) {
-//					System.out.println(wsp[i].getWord() + ":"
-//							+ wsp[i].getScore());
-//				}
-//			} catch (NullPointerException npe) {
-//				System.err.println("Nothing in the array");
-//			}
 			// **** Lab02 exercise: reduce the term set (according to
 			// 'aggressiveness') and print out each
 			// **** term in the reduced set next to its score
+			Map<String, Double> sorted = sortWordScorePairs(wsp);
+			try {
+				for (String items : sorted.keySet())
+					System.out.println(items + ":" + sorted.get(items));
+				// for (int i = 0; i < wsp.length; i++) {
+				// System.out.println(wsp[i].getWord() + ":"
+				// + wsp[i].getScore());
+				// }
+			} catch (NullPointerException npe) {
+				System.err.println("Nothing in the array");
+			}
+
 		} catch (Exception e) {
 			System.err
 					.println("\nUsage: MakeReducedTermSet CORPUS_LIST STOPWDLIST AGGRESSIVENESS TF_METHOD CATEG");
@@ -148,5 +192,24 @@ public class MakeReducedTermSet {
 					.println("            '_WAVG' (sum of local scores weighted by category generality),");
 			e.printStackTrace();
 		}
+	}
+}
+
+class ValueComparator implements Comparator<String> {
+
+	Map<String, Double> base;
+
+	public ValueComparator(Map<String, Double> base) {
+		this.base = base;
+	}
+
+	// Note: this comparator imposes orderings that are inconsistent with
+	// equals.
+	public int compare(String a, String b) {
+		if (base.get(a) >= base.get(b)) {
+			return -1;
+		} else {
+			return 1;
+		} // returning 0 would merge keys
 	}
 }

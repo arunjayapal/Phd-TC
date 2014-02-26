@@ -275,8 +275,8 @@ public class ProbabilityModel implements Serializable {
 		// p_TAnd_C //P (^t, ^c) = (1 − P(t))P(^t, c)
 		double p_TAnd_C = (1-pT)*p_TAndC;
 
-		System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
-				+ p_TAndC + ":" + p_TAnd_C);
+//		System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
+//				+ p_TAndC + ":" + p_TAnd_C);
 
 		return new Probabilities(pT, pC, pTAndC, pTAnd_C, p_TAndC, p_TAnd_C);
 	}
