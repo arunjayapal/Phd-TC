@@ -198,7 +198,9 @@ public class MakeReducedTermSet {
 			Map<String, Double> sorted = sortWordScorePairs(wsp);
 			try {
 				int tmp_count = 0;
+				aggressiveness = sorted.size()/aggressiveness;
 				for (String items : sorted.keySet()) {
+//					System.out.println(items + ":" + sorted.get(items));
 					if ((sorted.get(items).compareTo(Double.NaN) != 0)
 							&& tmp_count <= aggressiveness) {
 						System.out.println(items + ":" + sorted.get(items));

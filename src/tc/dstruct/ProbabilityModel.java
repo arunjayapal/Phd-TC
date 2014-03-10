@@ -253,17 +253,18 @@ public class ProbabilityModel implements Serializable {
 
 		// pT = total count of Term T in Corpus / total number of terms in
 		// Corpus
-		double pT = (double) getTermCount(term)
-				/ (double) getDocSet().size();
+		double pT = (double) (getTermCount(term) + 1)
+				/ (double) (getDocSet().size() + 100);
 
 		// pC = total count of Docs in Category C / total number of documents in
 		// Corpus
-		double pC = (double) getDocCount(cat) / (double) getDocSet().size();
+		double pC = (double) (getDocCount(cat) + 1)
+				/ (double) (getDocSet().size() + 100);
 
 		// pTAndC = total count of term T in Category C / total number of terms
 		// in Corpus
-		double pTAndC = ((double) getDocCount(term, cat)
-				/ (double) getDocSet().size()) * (pC); //
+		double pTAndC = (double) (getDocCount(term, cat) + 0.5)
+				/ (double) ((getDocSet().size() * (pC)) + 100); //
 
 		// pTAnd_C = total count of term T not in Category C / total number of
 		// terms in Corpus //P(t, ^c) = P(t) − P(t, c)
@@ -273,10 +274,10 @@ public class ProbabilityModel implements Serializable {
 		double p_TAndC = 1 - pTAndC;
 
 		// p_TAnd_C //P (^t, ^c) = (1 − P(t))P(^t, c)
-		double p_TAnd_C = (1-pT)*p_TAndC;
+		double p_TAnd_C = 1 - pT - p_TAndC;
 
-//		System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
-//				+ p_TAndC + ":" + p_TAnd_C);
+		// System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
+		// + p_TAndC + ":" + p_TAnd_C);
 
 		return new Probabilities(pT, pC, pTAndC, pTAnd_C, p_TAndC, p_TAnd_C);
 	}

@@ -34,24 +34,49 @@ public class InfoGain extends TermFilter {
 	 */
 	public double computeLocalTermScore(String term, String cat) {
 		Probabilities p = pm.getProbabilities(term, cat);
-		double first_ = (double) (p.tc)
-				* Maths.log2((double) (p.tc) / (double) (p.t * p.c)); // P(t, c)
+//		System.out.println(p.t + ":" + p.c + ":" + p.tc + ":" + p.c * p.t + ":"
+//				+ (1 - p.t) * (p.c) +":"+(p.t) * (1 - p.c)+":"+(1 - p.t) * (1 - p.c));
+		Double first_ = (double) (p.tc)
+				* (double) Maths.log2((double) (p.tc) / (double) (p.t * p.c)); // P(t, c)
 																		// = P
 																		// (t|c)
 																		// P(c)
-		double second_ = (double) (p.ntc)
-				* Maths.log2((double) p.ntc / (double) (1 - p.t)
-						* (double) (1 - p.c)); // P(^t, c) = (1 − P(t|c))P(c))
-		double third_ = (double) (p.tnc)
-				* Maths.log2((double) p.tnc / (double) (p.t)
-						* (double) (1 - p.c)); // P(t, ^c) = P(t) − P(t, c)
-		double fourth_ = ((double) p.ntnc)
-				* Maths.log2((double) p.ntnc
-						/ ((double) (1 - p.t) * (double) (1 - p.c))); // P (^t,
-																		// ^c) =
-																		// (1 −
-																		// P(t))P(^t,
-																		// c)
+		Double second_ = (double) (p.ntc)
+				* (double) Maths.log2((double) p.ntc / (double) ((1 - p.t) * (p.c))); // P(^t,
+																				// c)
+																				// =
+																				// (1
+																				// −
+																				// P(t|c))P(c))
+		Double third_ = (double) (p.tnc)
+				* (double) Maths.log2((double) p.tnc / (double) ((p.t) * (1 - p.c))); // P(t,
+																				// ^c)
+																				// =
+																				// P(t)
+																				// −
+																				// P(t,
+																				// c)
+		Double fourth_ = (double) p.ntnc
+				* (double) Maths.log2((double) p.ntnc / (double) ((1 - p.t) * (1 - p.c))); // P
+																					// (^t,
+																					// ^c)
+																					// =
+																					// (1
+																					// −
+																					// P(t))-P(^t,
+																					// c)
+																					// System.out.println(first_
+																					// +
+																					// ":"+second_+":"
+																					// +
+																					// third_+":"
+																					// +
+																					// fourth_);
+		if (first_.compareTo(Double.NaN)==0) first_ = 0.0;
+		if (second_.compareTo(Double.NaN)==0) second_ = 0.0;
+		if (third_.compareTo(Double.NaN)==0) third_ = 0.0;
+		if (fourth_.compareTo(Double.NaN)==0) fourth_ = 0.0;
+		
 		double ig = first_ + second_ + third_ + fourth_;
 		return ig;
 	}
@@ -68,10 +93,10 @@ public class InfoGain extends TermFilter {
 				+ " terms using f_sum");
 		Set<String> all_cats = pm.getCategorySet();
 		double ig = 0.0;
-		
-		for(String cat: all_cats)
-			ig+=computeLocalTermScore(term, cat);
-		
+
+		for (String cat : all_cats)
+			ig += computeLocalTermScore(term, cat);
+
 		return ig;
 	}
 
@@ -87,7 +112,7 @@ public class InfoGain extends TermFilter {
 				+ " terms using f_max");
 		Set<String> all_cats = pm.getCategorySet();
 		double ig = 0.0;
-		for(String cat: all_cats){
+		for (String cat : all_cats) {
 			if (computeLocalTermScore(term, cat) > ig)
 				ig = computeLocalTermScore(term, cat);
 		}
@@ -106,12 +131,12 @@ public class InfoGain extends TermFilter {
 				+ " using f_wavg");
 		Set<String> all_cats = pm.getCategorySet();
 		double ig = 0.0;
-		
-		for(String cat: all_cats)
-			ig+=computeLocalTermScore(term, cat);
-		
+
+		for (String cat : all_cats)
+			ig += computeLocalTermScore(term, cat);
+
 		ig /= all_cats.size();
-		
+
 		return ig;
 	}
 }
