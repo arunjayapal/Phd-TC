@@ -5,7 +5,6 @@
  **/
 package tc.tsr;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,9 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 
 import tc.dstruct.CorpusList;
 import tc.dstruct.ParsedText;
@@ -175,21 +172,17 @@ public class MakeReducedTermSet {
 		return sortedMap;
 	}
 
-	@SuppressWarnings({ "rawtypes", "static-access" })
-	public static void main(String[] args) {
+	@SuppressWarnings({ "rawtypes" })
+	public Map<String, Double> getReducedTermSet(String termFilter, String category, ProbabilityModel pm) {
 		try {
-			MakeReducedTermSet f = new MakeReducedTermSet(args[0], args[1],
-					args[2]);
-			String termFilter = args[3];
-			String category = args[4];
-			ProbabilityModel pm = new ProbabilityModel();
-			for (Enumeration e = f.clist.elements(); e.hasMoreElements();) {
+			
+			for (Enumeration e = clist.elements(); e.hasMoreElements();) {
 				String fname = (String) e.nextElement();
 				System.err.print("\n----- Processing: " + fname + " ------\n");
-				pm.addParsedText(f.parseNews(fname), swlist);
+				pm.addParsedText(parseNews(fname), swlist);
 			}
 			System.err.println("Probability Model size " + pm.getTermSetSize());
-			WordScorePair[] wsp = f.rank(termFilter, pm, category);
+			WordScorePair[] wsp = rank(termFilter, pm, category);
 			System.gc(); // garbage collection
 			System.err.println("Reducing Term set");
 			// **** Lab02 exercise: reduce the term set (according to
@@ -198,7 +191,7 @@ public class MakeReducedTermSet {
 			Map<String, Double> sorted = sortWordScorePairs(wsp);
 			try {
 				int tmp_count = 0;
-				aggressiveness = sorted.size()/aggressiveness;
+				aggressiveness = sorted.size() / aggressiveness;
 				for (String items : sorted.keySet()) {
 //					System.out.println(items + ":" + sorted.get(items));
 					if ((sorted.get(items).compareTo(Double.NaN) != 0)
@@ -213,6 +206,7 @@ public class MakeReducedTermSet {
 			} catch (NullPointerException npe) {
 				System.err.println("Nothing in the array");
 			}
+			return sorted;
 
 		} catch (Exception e) {
 			System.err
@@ -235,6 +229,7 @@ public class MakeReducedTermSet {
 					.println("            '_WAVG' (sum of local scores weighted by category generality),");
 			e.printStackTrace();
 		}
+		return null;
 	}
 }
 
