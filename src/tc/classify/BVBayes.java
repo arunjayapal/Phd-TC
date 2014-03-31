@@ -1,4 +1,5 @@
 package tc.classify;
+
 import tc.parser.*;
 import tc.dstruct.*;
 import tc.evaluation.*;
@@ -141,12 +142,9 @@ public class BVBayes {
 				}
 			}
 
-//			System.out.println(csvt.keySet());
-
 			if (tstrategy.proportional)
 				csvt.applyProportionalThreshold(pm.getCatGenerality(category));
 			else
-				// UCut strategy (RCut will not be implemented)
 				csvt.applyUCutThreshold(tstrategy.threshold);
 			System.out.println("Classification results for " + category);
 			System.out.println("EFFECTIVENESS:\n" + "  accuracy = "

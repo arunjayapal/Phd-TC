@@ -1,6 +1,6 @@
-/unsupported/luzs/TC/reuters21578-xml/reut2-004.xml
-/unsupported/luzs/TC/reuters21578-xml/reut2-016.xml
-/unsupported/luzs/TC/reuters21578-xml/reut2-009.xml
-/unsupported/luzs/TC/reuters21578-xml/reut2-001.xml
-/unsupported/luzs/TC/reuters21578-xml/reut2-000.xml
-/unsupported/luzs/TC/reuters21578-xml/reut2-018.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-004.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-016.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-009.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-001.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-000.xml
+/home/arunjayapal/Public/PhD/courses/MachineLearning/ProgAss1/reuters21578-xml/reut2-018.xml

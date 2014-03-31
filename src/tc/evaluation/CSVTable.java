@@ -52,8 +52,7 @@ public class CSVTable extends HashMap implements CSVManipulation {
 
 	@Override
 	public void applyProportionalThreshold(double generality) {
-		// TODO Auto-generated method stub
-		
+		System.out.println(id_cat_map.size());
 	}
 
 	@Override
@@ -93,8 +92,19 @@ public class CSVTable extends HashMap implements CSVManipulation {
 
 	@Override
 	public double getAccuracy() {
-		// TODO Auto-generated method stub
-		return 0;
+		Integer TP = 0, FP = 0, TN = 0, FN = 0;
+		for (Iterator e = this.entrySet().iterator(); e.hasNext();) {
+			Map.Entry kv = (Map.Entry) e.next();
+			if (((Double) kv.getValue() == 1.0) && id_cat_map.get(kv.getKey()).contains(category))
+				TP += 1;
+			else if (((Double) kv.getValue() == 1.0) && !id_cat_map.get(kv.getKey()).contains(category))
+				FP += 1;
+			else if (((Double) kv.getValue() == 0.0) && id_cat_map.get(kv.getKey()).contains(category))
+				FN += 1;
+			else
+				TN += 1;
+		}
+		return (double) (TP + 	TN) /  (double) (TP+FP+TN+FN);
 	}
 	/**
 	 * ******************** Lab 04: Exercise ********************* Implement the
