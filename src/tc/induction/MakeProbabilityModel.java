@@ -55,6 +55,7 @@ import java.util.Arrays;
  */
 
 public class MakeProbabilityModel {
+
 	private static CorpusList clist = null;
 	private static StopWordList swlist = null;
 	private static int aggressiveness = 0;
@@ -164,6 +165,7 @@ public class MakeProbabilityModel {
 					.println("       tokenise each file in CORPUS_LIST, remove words in STOPWDLIST");
 			System.err
 					.println("       and reduce the term set by a factor of AGGRESSIVENESS.\n");
+
 			System.err
 					.println(" TF_METHOD: term filtering method. One of: 'df' (document frequency, local),");
 			System.err
@@ -171,11 +173,13 @@ public class MakeProbabilityModel {
 			System.err.println("            'ig' (information gain)");
 			System.err.println("            'gss' (GSS coefficient)");
 			System.err.println("            'or' (Odds ratio)");
+
 			System.err.println(" CATEG: target category (e.g. 'acq'.) or");
 			System.err
 					.println("    a method for combining local scores. One of:");
 			System.err
 					.println("            '_DFG' (global document frequency),");
+
 			System.err.println("            '_MAX' (maximum local score),");
 			System.err.println("            '_SUM' (sum of local scores),");
 			System.err

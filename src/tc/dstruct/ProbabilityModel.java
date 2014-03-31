@@ -184,6 +184,7 @@ public class ProbabilityModel implements Serializable {
 					iss++;
 		// pT = total count of Term T in Corpus / total number of terms in
 		// Corpus
+
 		double pT = (double) tss / (double) corpusSize;
 
 		// pC = total count of Docs in Category C / total number of documents in
@@ -202,6 +203,7 @@ public class ProbabilityModel implements Serializable {
 		double p_TAndC = (double) (css - iss) / (double) corpusSize;
 
 		// p_TAnd_C //P (^t, ^c) = (1 − P(t))P(^t, c)
+
 		double p_TAnd_C = (double) (corpusSize - (css + tss - iss))
 				/ (double) corpusSize;
 

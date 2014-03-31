@@ -1,5 +1,4 @@
 package tc.classify;
-
 import tc.parser.*;
 import tc.dstruct.*;
 import tc.evaluation.*;
@@ -195,3 +194,4 @@ public class BVBayes {
 // System.out.println("NEWSID: "+pni.getId()+"\n"
 // +"CATEGS: "+ARFFUtil.toString(pni.getCategVector())+"\n"
 // +"CVS_"+category+": "+csv+"\n");
+

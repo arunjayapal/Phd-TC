@@ -1,4 +1,7 @@
 package tc.dstruct;
+
+import java.io.Serializable;
+
 /**
  *  Represent a term and its double-precision flot score
  *
