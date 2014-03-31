@@ -8,6 +8,7 @@ package tc.tsr;
 
 import java.util.Set;
 
+import tc.dstruct.Probabilities;
 import tc.dstruct.ProbabilityModel;
 
 /**
@@ -33,7 +34,8 @@ public class DocumentFrequency extends TermFilter {
 	 * integer) the document frequency for a given term and category.
 	 */
 	public double computeLocalTermScore(String term, String cat) {
-		return (double) pm.getDocCount(term, cat) / (double) pm.getDocSet().size();
+		Probabilities p = pm.getProbabilities(term, cat);
+	    return p.tc * pm.corpusSize;
 	}
 
 	/**
@@ -43,65 +45,6 @@ public class DocumentFrequency extends TermFilter {
 	 * than through computeGlobalScoresSUM
 	 */
 	public void computeGlobalDocFrequency() {
+		pm.setFreqWordScoreArray(wsp);
 	}
-
-	/**
-	 * ********** Lab 02 exercise: *************** Implement a method to combine
-	 * local, category-specific, scores (computed by computeLocalScores and
-	 * stored in wsp) into global scores through the method of SUM, and update
-	 * the WordScorePair table (wsp) with the global values. (Should this method
-	 * be implemented here or in TermFilter's subclasses?)
-	 */
-	public double computeGlobalScoresSUM(String term) {
-		System.err.println("Computing GLOBAL TSR for " + wsp.length
-				+ " terms using f_sum");
-		Set<String> all_cats = pm.getCategorySet();
-		double df = 0.0;
-		
-		for(String cat: all_cats)
-			df+=computeLocalTermScore(term, cat);
-		
-		return df;
-	}
-
-	/**
-	 * ********** Lab 02 exercise: *************** Implement a method to combine
-	 * local, category-specific, scores (computed by computeLocalScores and
-	 * stored in wsp) into global scores through the method of MAXIMA, and
-	 * update the WordScorePair table (wsp) with the global values. (Should this
-	 * method be implemented here or in TermFilter's subclasses?)
-	 */
-	public double computeGlobalScoresMAX(String term) {
-		System.err.println("Computing GLOBAL TSR for " + wsp.length
-				+ " terms using f_max");
-		Set<String> all_cats = pm.getCategorySet();
-		double df = 0.0;
-		for(String cat: all_cats){
-			if (computeLocalTermScore(term, cat) > df)
-				df = computeLocalTermScore(term, cat);
-		}
-		return df;
-	}
-
-	/**
-	 * ********** Lab 02 exercise: *************** Implement a method to combine
-	 * local, category-specific, scores (computed by computeLocalScores and
-	 * stored in wsp) into global scores through the method of WEIGHTED AVERAGE,
-	 * and update the WordScorePair table (wsp) with the global values. (Should
-	 * this method be implemented here or in TermFilter's subclasses?)
-	 */
-	public double computeGlobalScoresWAVG(String term) {
-		System.err.println("Computing GLOBAL TSR for " + wsp.length
-				+ " using f_wavg");
-		Set<String> all_cats = pm.getCategorySet();
-		double df = 0.0;
-		
-		for(String cat: all_cats)
-			df+=computeLocalTermScore(term, cat);
-		
-		df /= all_cats.size();
-		
-		return df;
-	}
-
 }

@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import tc.parser.Tokenizer;
+import tc.util.PrintUtil;
+
 /**
  * Store inverted indices of terms and categories (indexed to documents) which
  * form the basis of a probability model (see tTable and cTable vars below), and
@@ -25,6 +28,10 @@ import java.util.Vector;
  */
 public class ProbabilityModel implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private boolean ignoreCase = true;
 	/**
 	 * term table: ( term1 , [(doc_id1, No_of_occurrences_of_term1_in_id1), ...,
@@ -45,9 +52,6 @@ public class ProbabilityModel implements Serializable {
 	 * store the set of documents that make up this ProbabilityModel.
 	 */
 	private Set<String> docSet = new HashSet<String>();
-	private Set<String> termSet = new HashSet<String>();
-	private Map<String, Map<String, Integer>> termCount_cat = new HashMap<String, Map<String, Integer>>();
-	private int totalTermCountinCorpus = 0;
 	public int corpusSize = 0;
 
 	public ProbabilityModel() {
@@ -66,29 +70,12 @@ public class ProbabilityModel implements Serializable {
 	 * also addParsedNewsItem, which will actually do the indexing.
 	 */
 	public void addParsedText(ParsedText pt, StopWordList swlist) {
-		for (int i = 0; i < pt.size(); ++i) {
-			ParsedNewsItem pni = (ParsedNewsItem) pt.get(i);
-			addParsedNewsItem(pni, swlist);
+		for (Iterator i = pt.iterator(); i.hasNext();) {
+			corpusSize++;
+			PrintUtil.printNoMove("Generating prob models ...", corpusSize);
+			addParsedNewsItem((ParsedNewsItem) i.next(), swlist);
 		}
-	}
-
-	public List<String> getTerms(String id) {
-		List<String> terms = new ArrayList<String>();
-		for (String key : tTable.keySet()) {
-			Map internal_map = tTable.get(key);
-			if (internal_map.keySet().contains(id)) {
-				terms.add(key);
-			}
-		}
-		return terms;
-	}
-
-	public Set<String> getTermId(String cat) {
-		return cTable.get(cat);
-	}
-
-	public Integer getDocCount(String cat) {
-		return cTable.get(cat).size();
+		PrintUtil.donePrinting();
 	}
 
 	/**
@@ -104,62 +91,17 @@ public class ProbabilityModel implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public void addParsedNewsItem(ParsedNewsItem pni, StopWordList swlist) {
-		BagOfWords bow = new BagOfWords(pni.getText(), swlist);
 		String id = pni.getId();
-		String[] terms = bow.getTermSet();
-		termSet.addAll(Arrays.asList(terms));
-
-		Vector<String> cat = pni.getCategVector();
-
-		Map<String, Integer> termcount = new HashMap<String, Integer>();
 		docSet.add(id);
-
-		for (String term : terms) {
-			++totalTermCountinCorpus;
-			if (termcount.containsKey(term))
-				termcount.put(term, termcount.get(term) + 1);
-			else
-				termcount.put(term, 1);
-		}
-
-		for (String term : termcount.keySet())
-			putIntoTTable(term, id, termcount.get(term));
-
-		for (String categ : cat) {
-			putIntoCTable(categ, id);
-			if (termCount_cat.containsKey(categ)) {
-				for (String term : terms) {
-					Map<String, Integer> internal_map = null;
-					if (termCount_cat.get(categ).containsKey(term)) {
-						internal_map = termCount_cat.get(categ);
-						internal_map.put(term, internal_map.get(term) + 1);
-					} else {
-						internal_map = new HashMap<String, Integer>();
-						internal_map.put(term, 1);
-					}
-					termCount_cat.put(categ, internal_map);
-				}
-			} else {
-				Map<String, Integer> internal_map = new HashMap<String, Integer>();
-				int count = 0;
-				for (String term : terms) {
-					if (count == 0) {
-						internal_map.put(term, 1);
-						termCount_cat.put(categ, internal_map);
-						++count;
-					} else {
-						if (termCount_cat.get(categ).containsKey(term)) {
-							internal_map = termCount_cat.get(categ);
-							internal_map.put(term, internal_map.get(term) + 1);
-						} else {
-							internal_map = new HashMap<String, Integer>();
-							internal_map.put(term, 1);
-						}
-						termCount_cat.put(categ, internal_map);
-					}
-				}
-			}
-		}
+		// System.err.println("Generating set of words for text ID "+id);
+		WordFrequencyPair[] wfp = (new BagOfWords(pni.getText(), swlist))
+				.getWordFrequencyArray();
+		// System.err.println("Updating terms index");
+		for (int i = 0; i < wfp.length; i++)
+			putIntoTTable(wfp[i].getWord(), id, wfp[i].getIntegerCount());
+		// System.err.println("Updating categories index");
+		for (Iterator k = pni.getCategVector().iterator(); k.hasNext();)
+			putIntoCTable((String) k.next(), id);
 	}
 
 	// return set containing all categories that occur in the corpus
@@ -169,10 +111,6 @@ public class ProbabilityModel implements Serializable {
 
 	public Set<String> getDocSet() {
 		return docSet;
-	}
-
-	public Set<String> getTermSet() {
-		return termSet;
 	}
 
 	/**
@@ -212,32 +150,15 @@ public class ProbabilityModel implements Serializable {
 	public double getCatGenerality(String cat) {
 		// *** this return statement is just a place holder. you'll need to
 		// modify it
-		return getDocCount(cat) / getDocSet().size();
-	}
-
-	public int getTotalTermCount() {
-		int count = 0;
-		for (String each_key : tTable.keySet()) {
-			Map<String, Integer> internal_tTable = tTable.get(each_key);
-			for (String each_id : internal_tTable.keySet())
-				count += internal_tTable.get(each_id);
+		boolean barcat = false;
+		if (Tokenizer.isBar(cat)) {
+			cat = Tokenizer.disbar(cat);
+			barcat = true;
 		}
-		return count;
-	}
-
-	public int getTermCountInCorpus(String term) {
-		int count = 0;
-		Map<String, Integer> internal_tTable = tTable.get(term);
-		for (String each_id : internal_tTable.keySet())
-			count += internal_tTable.get(each_id);
-		return count;
-	}
-
-	public int getTermCountInCategory(String term, String cat) {
-		int count = 0;
-		for (Integer val : termCount_cat.get(cat).values())
-			count += val;
-		return count;
+		Set cs = (Set) cTable.get(cat);
+		int css = cs == null ? 0 : cs.size();
+		double c = (double) css / corpusSize; // p(c)
+		return barcat ? 1 - c : c;
 	}
 
 	/**
@@ -250,33 +171,42 @@ public class ProbabilityModel implements Serializable {
 	public Probabilities getProbabilities(String term, String cat) {
 		// *** this return statement is just a place holder. you'll need to
 		// modify it
-
+		Set ts = tTable.containsKey(term) ? ((Map) tTable.get(term)).keySet()
+				: null;
+		Set cs = (Set) cTable.get(cat);
+		int tss = ts == null ? 0 : ts.size();
+		int css = cs == null ? 0 : cs.size();
+		int iss = 0; // intersection of ts and cs (couldn't be done with
+						// ts.retainAll(cs) since retainAll is destructive)
+		if (tss > 0 && css > 0)
+			for (Iterator i = ts.iterator(); i.hasNext();)
+				if (cs.contains(i.next()))
+					iss++;
 		// pT = total count of Term T in Corpus / total number of terms in
 		// Corpus
-		double pT = (double) getTermCount(term)
-				/ (double) getDocSet().size();
+		double pT = (double) tss / (double) corpusSize;
 
 		// pC = total count of Docs in Category C / total number of documents in
 		// Corpus
-		double pC = (double) getDocCount(cat) / (double) getDocSet().size();
+		double pC = (double) css / (double) corpusSize;
 
 		// pTAndC = total count of term T in Category C / total number of terms
 		// in Corpus
-		double pTAndC = ((double) getDocCount(term, cat)
-				/ (double) getDocSet().size()) * (pC); //
+		double pTAndC = (double) iss / (double) corpusSize; //
 
 		// pTAnd_C = total count of term T not in Category C / total number of
 		// terms in Corpus //P(t, ^c) = P(t) − P(t, c)
-		double pTAnd_C = pT - pTAndC;
+		double pTAnd_C = (double) (tss - iss) / (double) corpusSize;
 
 		// p_TAndC //P(^t, c) = (1 − P(t|c))P(c))
-		double p_TAndC = 1 - pTAndC;
+		double p_TAndC = (double) (css - iss) / (double) corpusSize;
 
 		// p_TAnd_C //P (^t, ^c) = (1 − P(t))P(^t, c)
-		double p_TAnd_C = (1-pT)*p_TAndC;
+		double p_TAnd_C = (double) (corpusSize - (css + tss - iss))
+				/ (double) corpusSize;
 
-//		System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
-//				+ p_TAndC + ":" + p_TAnd_C);
+		// System.out.println(pT + ":" + pC + ":" + pTAndC + ":" + pTAnd_C + ":"
+		// + p_TAndC + ":" + p_TAnd_C);
 
 		return new Probabilities(pT, pC, pTAndC, pTAnd_C, p_TAndC, p_TAnd_C);
 	}
@@ -364,17 +294,6 @@ public class ProbabilityModel implements Serializable {
 	 */
 	public int getTermCount(String term) {
 		return tTable.get(term).size();
-	}
-
-	public int getDocCount(String term, String cat) {
-		Set<String> doc_ids_t = tTable.get(term).keySet();
-		Set<String> doc_ids_c = cTable.get(cat);
-		Set<String> docs_with_term_cat = new HashSet<String>();
-		for (String docs : doc_ids_t) {
-			if (doc_ids_c.contains(docs))
-				docs_with_term_cat.add(docs);
-		}
-		return docs_with_term_cat.size();
 	}
 
 	public boolean occursInCategory(String term, String cat) {
